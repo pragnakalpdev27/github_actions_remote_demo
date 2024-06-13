@@ -1,26 +1,27 @@
-name: Django CI/CD
+name: Deploy to Sever
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches:
+      - master
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Set up SSH
-      uses: webfactory/ssh-agent@v0.5.3
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.5.0
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Deploy to Server
+    - name: Add server host to known hosts
+      run: ssh-keyscan -H {34.171.241.212}>> ~/.ssh/known_hosts
+
+    - name: Deploy to server
       run: |
-        ssh pragnakalp.dev5@34.171.241.212 "cd /home/pragnakalp.dev5/github_action && git pull origin main"
-
-
+        # Replace the following with your deployment script or commands
+        ssh pragnakalp.dev5@34.171.241.212 "cd /home/pragnakalp.dev5/github_action && git pull origin master"
