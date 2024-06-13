@@ -58,13 +58,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout code 
       uses: actions/checkout@v2
 
-    - name: Set up SSH
+    - name: Set up SSH on 
       uses: webfactory/ssh-agent@v0.5.3
       with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+        ssh-private-key: ${{ secrets.c }}
 
     - name: Sync files to the server
       run: |
