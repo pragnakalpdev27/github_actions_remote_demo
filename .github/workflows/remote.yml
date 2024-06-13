@@ -68,8 +68,10 @@ jobs:
 
     - name: Sync files to the server
       run: |
-        rsync -avz --exclude 'env' --exclude '.git' ./ username@remote_host:/path/to/remote/project
+        rsync -avz --exclude 'env' --exclude '.git' ./ pragnakalp.dev5@34.171.241.212:/path/to/remote/project
 
     - name: Restart server
       run: |
-        ssh username@remote_host 'sudo systemctl restart myproject'
+        ssh pragnakalp.dev5@34.171.241.212 'sudo systemctl restart myproject'
+
+
