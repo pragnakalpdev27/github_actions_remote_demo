@@ -37,8 +37,10 @@ jobs:
       with:
         python-version: '3.8'
 
-    run: pip install --upgrade pip
-    
+    - name: Upgrade pip
+      run: |
+      pip install --upgrade pip
+
     - name: Install dependencies
       run: |
         python -m venv env
