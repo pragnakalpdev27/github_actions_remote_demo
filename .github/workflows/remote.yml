@@ -1,25 +1,32 @@
-name: Django CI/CD
+# name of our workflow
+name: Django CI
 
-on:
-  push:
+# Workflow Triggers
+
+on: #Defines the events that trigger the workflow.
+  push: #Runs the workflow when there is a push to the master branch
     branches: [ master ]
-  pull_request:
+  pull_request: #Runs the workflow when a pull request is created or updated targeting the master branch.
     branches: [ master ]
 
-jobs:
-  build:
+#Jobs
+jobs: #Specifies the jobs that will run as part of the workflow
+  build: #The name of the job that will be executed.
 
-    runs-on: ubuntu-latest
+    # Job Configuration
+    runs-on: ubuntu-latest #Specifies the type of virtual environment to run the job. In this case, it uses the latest version of Ubuntu.
 
-    services:
-      postgres:
-        image: postgres:11
-        env:
-          POSTGRES_DB: myproject
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: password
-        ports:
+    #Services
+    services: #Defines the services that are needed for the job. Here, a PostgreSQL database is set up.
+      postgres: #The name of the service.
+        image: postgres:11 #The Docker image to use for the service, postgres:11.
+        env: # Environment variables to configure the PostgreSQL database
+          POSTGRES_DB: myproject #The name of the database 
+          POSTGRES_USER: user #The database user
+          POSTGRES_PASSWORD: password #The database password
+        ports: #Maps port 5432 of the service to port 5432 on the host.
           - 5432:5432
+        # Additional options for health checks to ensure the PostgreSQL service is ready before proceeding.
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -27,17 +34,22 @@ jobs:
           --health-retries 5
 
     env:
+      # The database URL that Django will use to connect to the PostgreSQL service.
       DATABASE_URL: postgres://user:password@localhost:5432/myproject
 
-    steps:
-    - uses: actions/checkout@v2
+    steps: #Lists the individual steps that are executed in the job.
+    #Checkout Repository
+    - uses: actions/checkout@v2 #Executes the actions/checkout action to clone the repository onto the runner.
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.8'
+    #Set up Python
+    - name: Set up Python #A descriptive name for the step.
+      uses: actions/setup-python@v2 #Executes the actions/setup-python action to set up Python.
+      with: #Specifies additional parameters for the action.
+        python-version: '3.8' #The version of Python to install
 
-    - name: Install dependencies
+    #Install Dependencies
+    - name: Install dependencies #A descriptive name for the step.
+      #run: Executes a shell command
       run: |
         python -m venv env
         source env/bin/activate
@@ -52,24 +64,3 @@ jobs:
       run: |
         source env/bin/activate
         python manage.py test
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Set up SSH
-      uses: webfactory/ssh-agent@v0.5.3
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-    - name: Sync files to the server
-      run: |
-        rsync -avz --exclude 'env' --exclude '.git' ./ username@remote_host:/path/to/remote/project
-
-    - name: Restart server
-      run: |
-        ssh username@remote_host 'sudo systemctl restart myproject'
