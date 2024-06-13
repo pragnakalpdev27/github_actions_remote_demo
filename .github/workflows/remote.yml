@@ -7,52 +7,6 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:11
-        env:
-          POSTGRES_DB: myproject
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: password
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    env:
-      DATABASE_URL: postgres://user:password@localhost:5432/myproject
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.8'
-
-    - name: Install dependencies
-      run: |
-        python -m venv env
-        source env/bin/activate
-        pip install -r requirements.txt
-
-    - name: Run migrations
-      run: |
-        source env/bin/activate
-        python manage.py migrate
-
-    - name: Run tests
-      run: |
-        source env/bin/activate
-        python manage.py test
-
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -66,12 +20,8 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Sync files to the server
+    - name: Deploy to Server
       run: |
-        rsync -avz --exclude 'env' --exclude '.git' ./ pragnakalp.dev5@34.171.241.212:/path/to/remote/project
-
-    - name: Restart server
-      run: |
-        ssh pragnakalp.dev5@34.171.241.212 'sudo systemctl restart myproject'
+        ssh pragnakalp.dev5@34.171.241.212 "cd /home/pragnakalp.dev5/github_action && git pull origin main"
 
 
