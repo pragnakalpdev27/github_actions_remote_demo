@@ -18,10 +18,10 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Add server host to known hosts
-      run: ssh-keyscan -H 34.171.241.212>> ~/.ssh/known_hosts
-
     - name: Deploy to server
       run: |
-        # Replace the following with your deployment script or commands
-        ssh pragnakalp.dev5@34.171.241.212 "cd /home/pragnakalp.dev5/github_action && git pull origin master"
+        ssh pragnakalp.dev5@34.71.200.59 "cd /home/pragnakalp.dev5/github_action && git pull origin master"
+      
+    - name: Restart Django Service
+      run: |
+        ssh pragnakalp.dev5@34.71.200.59 'sudo systemctl restart myproject'
