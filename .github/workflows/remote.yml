@@ -93,6 +93,3 @@ jobs:
       run: |
         ssh pragnakalp.dev5@34.171.241.212 "cd /home/pragnakalp.dev5/github_action && git pull origin master"
       
-    - name: Restart Django Service
-      run: |
-        ssh pragnakalp.dev5@34.171.241.212 'sudo systemctl restart myproject'
