@@ -1,27 +1,97 @@
-name: Deploy to Server
+name: Django Build, Test and Deploy
 
 on:
   push:
-    branches:
-      - master
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Setup SSH
-      uses: webfactory/ssh-agent@v0.5.0
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+
+    - name: Install dependencies
+      run: |
+        python -m venv env
+        source env/bin/activate
+        pip install -r requirements.txt
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:11
+        env:
+          POSTGRES_DB: myproject
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgres://user:password@localhost:5432/myproject
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+
+    - name: Install dependencies
+      run: |
+        python -m venv env
+        source env/bin/activate
+        pip install -r requirements.txt
+
+    - name: Run migrations
+      run: |
+        source env/bin/activate
+        python manage.py migrate
+
+    - name: Run tests
+      run: |
+        source env/bin/activate
+        python manage.py test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+    - name: Add server host to known hosts
+      run: ssh-keyscan -H 34.171.241.212>> ~/.ssh/known_hosts
+
     - name: Deploy to server
       run: |
-        ssh pragnakalp.dev5@34.71.200.59 "cd /home/pragnakalp.dev5/github_action && git pull origin master"
+        ssh pragnakalp.dev5@34.171.241.212 "cd /home/pragnakalp.dev5/github_action && git pull origin master"
       
     - name: Restart Django Service
       run: |
-        ssh pragnakalp.dev5@34.71.200.59 'sudo systemctl restart myproject'
+        ssh pragnakalp.dev5@34.171.241.212 'sudo systemctl restart myproject'
