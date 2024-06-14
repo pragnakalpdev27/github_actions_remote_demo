@@ -1,0 +1,28 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.5.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Add server host to known hosts
+      run: ssh-keyscan -H 35.224.252.43>> ~/.ssh/known_hosts
+
+    - name: Deploy to server
+      run: |
+        ssh pragnakalp.dev5@35.224.252.43 "cd /home/pragnakalp.dev5/github_action && git pull origin master"
+      
+    
