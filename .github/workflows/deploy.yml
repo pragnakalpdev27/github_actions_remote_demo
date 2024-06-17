@@ -26,5 +26,5 @@ jobs:
         ssh pragnakalp.dev5@34.46.219.229 "cd /home/pragnakalp.dev5/github_action && git pull origin master"
     - name: Restart Gunicorn
       run: |
-        ssh pragnakalp.dev5@34.46.219.22 'sudo systemctl restart myproject'
+        ssh pragnakalp.dev5@34.46.219.229 'sudo systemctl restart myproject'
     
