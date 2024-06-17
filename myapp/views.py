@@ -8,3 +8,6 @@ def home(request):
 
 def demo(request):
     return HttpResponse("Hello world pragnakalp!")
+
+def test(request):
+    return HttpResponse("Hello world today is Jun 17!")
